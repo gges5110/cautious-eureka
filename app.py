@@ -17,10 +17,18 @@ profile_uri = 'https://www.googleapis.com/oauth2/v1/userinfo'
 @app.route('/')
 @app.route('/index')
 def index():
+    userEmail = None
+    if 'email' in session:
+        userEmail = session['email']
     template_values = {
-        'email': session['email']
+        'email': userEmail
     }
     return render_template('index.html', **template_values)
+
+@app.route('/logout')
+def logout():
+    session.pop('email', '')
+    return redirect(url_for('index'))
 
 @app.route('/login')
 def login():
