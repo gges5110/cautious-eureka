@@ -18,10 +18,15 @@ profile_uri = 'https://www.googleapis.com/oauth2/v1/userinfo'
 @app.route('/index')
 def index():
     userEmail = None
+    profilePicURL = None
     if 'email' in session:
         userEmail = session['email']
+    if 'profile_pic_url' in session:
+        profilePicURL = session['profile_pic_url']
+
     template_values = {
-        'email': userEmail
+        'email': userEmail,
+        'profile_pic_url': profilePicURL
     }
     return render_template('index.html', **template_values)
 
@@ -57,6 +62,7 @@ def callback():
         access_token = r.json()['access_token']
         r = requests.get(profile_uri, params={'access_token': access_token})
         session['email'] = r.json()['email']
+        session['profile_pic_url'] = r.json()['picture']
         return redirect(url_for('index'))
     else:
         return 'ERROR'

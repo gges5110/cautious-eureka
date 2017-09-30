@@ -7,7 +7,13 @@
   <body>
     Hello world.
     {% if email %}
-      {{ email }}
+      {{email}}
+    {% endif %}
+
+    {% if profile_pic_url %}
+    <img src="{{profile_pic_url}}" style="border-radius: 50%; height: 100px">
+    {% else %}
+    <img src="{{ url_for('static', filename = 'picture/default-user-image.png')}}" style="border-radius: 50%; height: 100px">
     {% endif %}
   </body>
 </html>
