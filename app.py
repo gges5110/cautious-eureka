@@ -17,9 +17,16 @@ profile_uri = 'https://www.googleapis.com/oauth2/v1/userinfo'
 @app.route('/')
 @app.route('/index')
 def index():
+    userEmail = None
+    profilePicURL = None
+    if 'email' in session:
+        userEmail = session['email']
+    if 'profile_pic_url' in session:
+        profilePicURL = session['profile_pic_url']
+        
     template_values = {
-        'email': session['email'],
-        'profile_pic_url': session['profile_pic_url']
+        'email': userEmail,
+        'profile_pic_url': profilePicURL
     }
     return render_template('index.html', **template_values)
 
