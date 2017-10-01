@@ -1,11 +1,14 @@
 from flask import *
-import credentials as credentials
+try:
+    import credentials as credentials
+except:
+    pass
 import os
 import urllib
 import requests
 
 app = Flask(__name__)
-app.secret_key = credentials.app_secret_key
+app.secret_key = os.environ.get('SECRET_KEY', credentials.app_secret_key)
 
 redirect_uri = 'http://localhost:5000/callback'
 auth_uri = 'https://accounts.google.com/o/oauth2/auth'
@@ -53,8 +56,8 @@ def callback():
         # Step 2
         code = request.args.get('code')
         data = dict(code=code,
-                    client_id=credentials.client_id,
-                    client_secret=credentials.client_secret,
+                    client_id=os.environ.get('CLIENT_ID', credentials.client_id),
+                    client_secret=os.environ.get('CLIENT_SECRET', credentials.client_secret),
                     redirect_uri=redirect_uri,
                     grant_type='authorization_code')
         r = requests.post(token_uri, data=data)
