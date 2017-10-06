@@ -1,5 +1,8 @@
 from flask import *
-import credentials as credentials
+try:
+    import credentials as credentials
+except:
+    pass
 import os
 import urllib
 import requests
@@ -10,7 +13,7 @@ from views.api import api
 
 app = Flask(__name__)
 app.register_blueprint(api)
-app.secret_key = credentials.app_secret_key
+app.secret_key = os.environ.get('SECRET_KEY') if 'SECRET_KEY' in os.environ else credentials.app_secret_key
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://sid:sid12345@localhost:5432/flash_cards'
 db = SQLAlchemy(app)
@@ -52,7 +55,7 @@ def login():
     # Step 1
     params = dict(response_type='code',
                   scope=' '.join(scope),
-                  client_id=credentials.client_id,
+                  client_id=os.environ.get('CLIENT_ID') if 'CLIENT_ID' in os.environ else credentials.client_id,
                   approval_prompt='force',  # or 'auto'
                   redirect_uri=redirect_uri)
     #   https://stackoverflow.com/questions/28906859/module-has-no-attribute-urlencode
@@ -65,8 +68,8 @@ def callback():
         # Step 2
         code = request.args.get('code')
         data = dict(code=code,
-                    client_id=credentials.client_id,
-                    client_secret=credentials.client_secret,
+                    client_id=os.environ.get('CLIENT_ID') if 'CLIENT_ID' in os.environ else credentials.client_id,
+                    client_secret=os.environ.get('CLIENT_SECRET') if 'CLIENT_SECRET' in os.environ else credentials.client_secret,
                     redirect_uri=redirect_uri,
                     grant_type='authorization_code')
         r = requests.post(token_uri, data=data)
