@@ -3,9 +3,20 @@ import credentials as credentials
 import os
 import urllib
 import requests
+from flask_sqlalchemy import SQLAlchemy
+
+# Routing setup
+from views.api import api
 
 app = Flask(__name__)
+app.register_blueprint(api)
 app.secret_key = credentials.app_secret_key
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://sid:sid12345@localhost:5432/flash_cards'
+db = SQLAlchemy(app)
+
+# from models import Deck does not work...
+from models import *
 
 redirect_uri = 'http://localhost:5000/callback'
 auth_uri = 'https://accounts.google.com/o/oauth2/auth'
@@ -33,6 +44,7 @@ def index():
 @app.route('/logout')
 def logout():
     session.pop('email', '')
+    session.pop('profile_pic_url', '')
     return redirect(url_for('index'))
 
 @app.route('/login')
@@ -47,7 +59,7 @@ def login():
     url = auth_uri + '?' + urllib.parse.urlencode(params)
     return redirect(url)
 
-@app.route('/callback')
+@app.route('/callback', methods=['GET'])
 def callback():
     if 'code' in request.args:
         # Step 2
@@ -63,6 +75,14 @@ def callback():
         r = requests.get(profile_uri, params={'access_token': access_token})
         session['email'] = r.json()['email']
         session['profile_pic_url'] = r.json()['picture']
+
+
+        if User.query.filter_by(user_email=session['email']).count() == 0:
+            # Automatically create an account for user if not found in our database.
+            new_user = User(user_email=session['email'])
+            db.session.add(new_user)
+            db.session.commit()
+
         return redirect(url_for('index'))
     else:
         return 'ERROR'

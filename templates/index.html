@@ -5,7 +5,12 @@
     <title>Hello</title>
   </head>
   <body>
+    <div class="">
+      <a href="{{url_for('login')}}">Login</a>
+      <a href="{{url_for('logout')}}">Logout</a>
+    </div>
     Hello world.
+
     {% if email %}
       {{email}}
     {% endif %}
