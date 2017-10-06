@@ -8,7 +8,7 @@ import urllib
 import requests
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', credentials.app_secret_key)
+app.secret_key = os.environ.get('SECRET_KEY') if 'SECRET_KEY' in os.environ else credentials.app_secret_key
 
 redirect_uri = 'http://localhost:5000/callback'
 auth_uri = 'https://accounts.google.com/o/oauth2/auth'
@@ -43,7 +43,7 @@ def login():
     # Step 1
     params = dict(response_type='code',
                   scope=' '.join(scope),
-                  client_id=credentials.client_id,
+                  client_id=os.environ.get('CLIENT_ID') if 'CLIENT_ID' in os.environ else credentials.client_id,
                   approval_prompt='force',  # or 'auto'
                   redirect_uri=redirect_uri)
     #   https://stackoverflow.com/questions/28906859/module-has-no-attribute-urlencode
@@ -56,8 +56,8 @@ def callback():
         # Step 2
         code = request.args.get('code')
         data = dict(code=code,
-                    client_id=os.environ.get('CLIENT_ID', credentials.client_id),
-                    client_secret=os.environ.get('CLIENT_SECRET', credentials.client_secret),
+                    client_id=os.environ.get('CLIENT_ID') if 'CLIENT_ID' in os.environ else credentials.client_id,
+                    client_secret=os.environ.get('CLIENT_SECRET') if 'CLIENT_SECRET' in os.environ else credentials.client_secret,
                     redirect_uri=redirect_uri,
                     grant_type='authorization_code')
         r = requests.post(token_uri, data=data)
