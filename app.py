@@ -20,6 +20,7 @@ db = SQLAlchemy(app)
 
 # from models import Deck does not work...
 from models import *
+import db_init as db_init
 
 redirect_uri = 'http://localhost:5000/callback'
 auth_uri = 'https://accounts.google.com/o/oauth2/auth'
@@ -93,5 +94,6 @@ def callback():
 if __name__ == '__main__':
     # https://stackoverflow.com/questions/17260338/deploying-flask-with-heroku
     # Bind to PORT if defined, otherwise default to 5000.
+    db_init.init()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)

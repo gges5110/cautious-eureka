@@ -3,7 +3,7 @@ from flask import Blueprint, session, request
 api = Blueprint('api', __name__)
 from models import *
 @api.route('/create_deck', methods=['POST'])
-def create_table_function():
+def create_deck_function():
     # Check if user has logged in.
     if 'email' not in session:
         return "Please login first!"
@@ -23,4 +23,4 @@ def create_table_function():
     new_deck = Deck(deck_name=content['deck_name'], owner_id=user.id)
     db.session.add(new_deck)
     db.session.commit()
-    return "haha"
+    return "New deck created."
