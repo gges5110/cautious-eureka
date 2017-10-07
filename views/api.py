@@ -1,4 +1,4 @@
-from flask import Blueprint, session, request
+from flask import Blueprint, session, request, jsonify
 
 api = Blueprint('api', __name__)
 from models import *
@@ -24,3 +24,15 @@ def create_deck_function():
     db.session.add(new_deck)
     db.session.commit()
     return "New deck created."
+
+@api.route('/get_all_decks', methods=['GET'])
+def get_all_decks():
+    # Check if user has logged in.
+    if 'email' not in session:
+        return "Please login first!"
+
+    # Get all decks from this user
+    user = User.query.filter_by(user_email=session['email']).first()
+    decks = Deck.query.filter_by(owner_id=user.id).all()
+    # json_list = [i.serialize for i in qryresult.all()]
+    return jsonify(json_list=[i.serialize for i in decks])
