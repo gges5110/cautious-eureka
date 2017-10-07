@@ -91,6 +91,27 @@ def callback():
     else:
         return 'ERROR'
 
+def has_no_empty_params(rule):
+    defaults = rule.defaults if rule.defaults is not None else ()
+    arguments = rule.arguments if rule.arguments is not None else ()
+    return len(defaults) >= len(arguments)
+
+@app.route("/site-map")
+def site_map():
+    links = []
+    for rule in app.url_map.iter_rules():
+        # Filter out rules we can't navigate to in a browser
+        # and rules that require parameters
+        if "GET" in rule.methods and has_no_empty_params(rule):
+            url = url_for(rule.endpoint, **(rule.defaults or {}))
+            links.append((url, rule.endpoint))
+
+        template_values = {
+            'links': links
+        }
+    return render_template('site-map.html', **template_values)
+
+
 if __name__ == '__main__':
     # https://stackoverflow.com/questions/17260338/deploying-flask-with-heroku
     # Bind to PORT if defined, otherwise default to 5000.
