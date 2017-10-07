@@ -102,3 +102,4 @@ ENV/
 
 # credentials
 credentials.py
+.vscode/settings.json
