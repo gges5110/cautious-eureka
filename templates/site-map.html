@@ -7,10 +7,18 @@
 </head>
 
 <body>
-  {% for link in links %}
+  Get links
+  {% for link in GET_links %}
   <div class="">
     {{link}}
   </div>
+  {% endfor %}
+
+  </br>Post links
+  {% for link in POST_links %}
+    <div class="">
+      {{link}}
+    </div>
   {% endfor %}
 </body>
 

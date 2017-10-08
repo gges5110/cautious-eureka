@@ -12,17 +12,23 @@ from flask_sqlalchemy import SQLAlchemy
 from views.api import api
 
 app = Flask(__name__)
-app.register_blueprint(api)
+app.register_blueprint(api, url_prefix='/api')
 app.secret_key = os.environ.get('SECRET_KEY') if 'SECRET_KEY' in os.environ else credentials.app_secret_key
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://sid:sid12345@localhost:5432/flash_cards'
+
+redirect_uri = ''
+if os.environ['MODE'] == 'development':
+    app.config.from_object('config.Config')
+    redirect_uri = 'http://localhost:5000/callback'
+elif os.environ['MODE'] == 'production':
+    app.config.from_object('config.ProductionConfig')
+    redirect_uri = 'https://cautious-eureka.herokuapp.com/callback'
+
 db = SQLAlchemy(app)
 
 # from models import Deck does not work...
 from models import *
 import db_init as db_init
 
-redirect_uri = 'http://localhost:5000/callback'
 auth_uri = 'https://accounts.google.com/o/oauth2/auth'
 token_uri = 'https://accounts.google.com/o/oauth2/token'
 scope = ('https://www.googleapis.com/auth/userinfo.profile',
@@ -98,19 +104,24 @@ def has_no_empty_params(rule):
 
 @app.route("/site-map")
 def site_map():
-    links = []
+    GET_links = []
+    POST_links = []
     for rule in app.url_map.iter_rules():
         # Filter out rules we can't navigate to in a browser
         # and rules that require parameters
         if "GET" in rule.methods and has_no_empty_params(rule):
             url = url_for(rule.endpoint, **(rule.defaults or {}))
-            links.append((url, rule.endpoint))
+            GET_links.append((url, rule.endpoint))
+
+        if "POST" in rule.methods and has_no_empty_params(rule):
+            url = url_for(rule.endpoint, **(rule.defaults or {}))
+            POST_links.append((url, rule.endpoint))
 
         template_values = {
-            'links': links
+            'GET_links': GET_links,
+            'POST_links': POST_links
         }
     return render_template('site-map.html', **template_values)
-
 
 if __name__ == '__main__':
     # https://stackoverflow.com/questions/17260338/deploying-flask-with-heroku

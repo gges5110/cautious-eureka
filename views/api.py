@@ -34,5 +34,4 @@ def get_all_decks():
     # Get all decks from this user
     user = User.query.filter_by(user_email=session['email']).first()
     decks = Deck.query.filter_by(owner_id=user.id).all()
-    # json_list = [i.serialize for i in qryresult.all()]
     return jsonify(json_list=[i.serialize for i in decks])
